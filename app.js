@@ -10,6 +10,8 @@ app.use(bodyParser.json());
 const routes = require('./routes');
 
 app.use('/', routes);
+
+app.use(express.json());
 // db connection
 mongoose.connect(process.env.MONGO_DB_URI, {
     useNewUrlParser: true,
@@ -21,4 +23,4 @@ mongoose.connect(process.env.MONGO_DB_URI, {
 });
 
 
-app.listen(3000);
+app.listen(5000, () => console.log('Server started'));

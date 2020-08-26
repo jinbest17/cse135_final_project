@@ -12,7 +12,7 @@ const lcpFinal = require('../models/lcpFinal');
 const navTiming = require('../models/navigationTiming');
 const networkInfo = require('../models/networkInformation');
 const storEstimate = require('../models/storageEstimate');
-const tbt = require('../models/tb');
+const tbt = require('../models/tbt');
 
 // add router for apis here
 

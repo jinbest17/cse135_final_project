@@ -1,7 +1,7 @@
 // dependencies
 const express = require('express');
 const router = express.Router();
-const User = require('../models/analytics');
+const browser = require('../models/initialBrowserData');
 
 // add router for apis here
 router.get('/', (req, res) => {
@@ -27,6 +27,7 @@ router.get('/browsers/:id', (req, res) => {
  */
 router.post('/browsers', (req, res) => {
     console.log(req.body);
+    res.status(201);
 });
 
 /**
@@ -46,7 +47,7 @@ router.delete('/browsers/:id', (req, res) => {
 /**
  * Update an entry given id
  */
-router.post('/browsers/:id', (req, res) => {
+router.put('/browsers/:id', (req, res) => {
     console.log(req.body);
 });
 

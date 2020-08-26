@@ -6,9 +6,9 @@ const bodyParser = require('body-parser')
 
 
 app.use(bodyParser.json());
+
 // import routes
 const routes = require('./routes');
-
 app.use('/', routes);
 
 app.use(express.json());

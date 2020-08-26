@@ -12,6 +12,9 @@ const tbtSchema = mongoose.Schema({
     },
     vitalsScore: {
         type: String
+    },
+    timestamp: {
+        type: Number
     }
 
 });

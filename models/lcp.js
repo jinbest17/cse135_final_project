@@ -12,6 +12,9 @@ const lcpSchema = mongoose.Schema({
     },
     vitalsScore: {
         type: String
+    },
+    timestamp: {
+        type: Number
     }
 
 });

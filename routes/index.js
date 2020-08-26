@@ -17,7 +17,7 @@ const tbt = require('../models/tbt');
 // add router for apis here
 
 router.get('/', (req, res) => {
-    res.send("You are on home page");
+    res.send("This is the REST API home directory");
 });
 
 /**
@@ -35,13 +35,8 @@ router.get('/initialBrowserData', async (req, res) => {
 /**
  * Get specific entry given id
  */
-router.get('/initialBrowserData/:id', async (req, res) => {
-    try {
-        const data = await browser.findById(id);
-        res.json(data);
-    } catch (err) {
-        res.status(500).json({message: err.message});
-    }
+router.get('/initialBrowserData/:id', getInitialBrowserData, async (req, res) => {
+    res.json(res.data);
 });
 
 /**
@@ -52,7 +47,8 @@ router.post('/initialBrowserData', async (req, res) => {
         data: req.body.data,
         eventProperties: req.body.eventProperties,
         navigatorInformation: req.body.navigatorInformation,
-        vitalsScore: req.body.vitalsScore
+        vitalsScore: req.body.vitalsScore,
+        timestamp: req.body.timestamp
     });
     try {
        const savedEntry = await newEntry.save();
@@ -62,25 +58,58 @@ router.post('/initialBrowserData', async (req, res) => {
     }
 });
 
-/**
- * Add new entry with custom id
- */
-router.post('/initialBrowserData', (req, res) => {
-    console.log(req.body);
-});
 
 /**
  * Delete an entry given id
  */
-router.delete('/initialBrowserData/:id', (req, res) => {
-    console.log(req.body);
+router.delete('/initialBrowserData/:id', getInitialBrowserData, async (req, res) => {
+    try {
+        await res.data.remove();
+        res.json({message: 'deleted given entry'});
+    } catch {
+        res.status(500).json({message: err.message});
+    }
 });
 
 /**
  * Update an entry given id
  */
 router.put('/initialBrowserData/:id', (req, res) => {
-    console.log(req.body);
+    if (!req.body) {
+        return res.status(400).send({
+          message: "Data to update can not be empty!"
+        });
+      }
+    
+      const id = req.params.id;
+    
+      Tutorial.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
+        .then(data => {
+          if (!data) {
+            res.status(404).send({
+              message: `Cannot update Tutorial with id=${id}. Maybe Tutorial was not found!`
+            });
+          } else res.send({ message: "Tutorial was updated successfully." });
+        })
+        .catch(err => {
+          res.status(500).send({
+            message: "Error updating Tutorial with id=" + id
+          });
+        });
 });
+
+async function getInitialBrowserData(req, res, next) {
+    let result;
+    try {
+        result = await browser.findById(req.params.id);
+        if(result == null) {
+            return res.status(404).json({message: 'Cannot find document associated with given id.'});
+        }
+    } catch (err) {
+        return res.status(500).json({message: err.message});
+    }
+    res.data = data;
+    next();
+}
 
 module.exports = router;

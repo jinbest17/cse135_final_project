@@ -12,6 +12,9 @@ const networkInfoSchema = mongoose.Schema({
     },
     vitalsScore: {
         type: String
+    },
+    timestamp: {
+        type: Number
     }
 
 });

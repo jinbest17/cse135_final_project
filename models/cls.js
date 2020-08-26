@@ -15,6 +15,9 @@ const clsSchema = mongoose.Schema({
     },
     timestamp: {
         type: Number
+    },
+    clientAddress: {
+        type: String
     }
 
 });

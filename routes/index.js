@@ -48,7 +48,8 @@ router.post('/initialBrowserData', async (req, res) => {
         eventProperties: req.body.eventProperties,
         navigatorInformation: req.body.navigatorInformation,
         vitalsScore: req.body.vitalsScore,
-        timestamp: req.body.timestamp
+        timestamp: req.body.timestamp,
+        clientAddress: req.ip
     });
     try {
        const savedEntry = await newEntry.save();

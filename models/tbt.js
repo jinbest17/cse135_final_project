@@ -15,6 +15,9 @@ const tbtSchema = mongoose.Schema({
     },
     timestamp: {
         type: Number
+    },
+    clientAddress: {
+        type: String
     }
 
 });

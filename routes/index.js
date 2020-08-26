@@ -36,7 +36,7 @@ router.get('/initialBrowserData', async (req, res) => {
  * Get specific entry given id
  */
 router.get('/initialBrowserData/:id', getInitialBrowserData, async (req, res) => {
-    res.json(res.data);
+    res.json(res.result);
 });
 
 /**
@@ -64,7 +64,7 @@ router.post('/initialBrowserData', async (req, res) => {
  */
 router.delete('/initialBrowserData/:id', getInitialBrowserData, async (req, res) => {
     try {
-        await res.data.remove();
+        await res.result.remove();
         res.json({message: 'deleted given entry'});
     } catch {
         res.status(500).json({message: err.message});
@@ -108,7 +108,7 @@ async function getInitialBrowserData(req, res, next) {
     } catch (err) {
         return res.status(500).json({message: err.message});
     }
-    res.data = data;
+    res.result = result;
     next();
 }
 

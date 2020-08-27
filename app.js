@@ -7,6 +7,7 @@ const bodyParser = require('body-parser')
 
 app.use(bodyParser.json());
 
+app.set('trust proxy', true);
 // import routes
 const routes = require('./routes');
 app.use('/', routes);

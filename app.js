@@ -40,4 +40,4 @@ mongoose.connect(process.env.MONGO_DB_URI, {
 });
 
 
-app.listen(5000, () => console.log('Server started'));
+app.listen(6000, () => console.log('Server started'));

@@ -139,9 +139,12 @@ router.patch('/api/:id', getUserAuthData, async (req, res) => {
     if (req.body.email != null) {
       res.result.email = req.body.email
     }
-    if (req.body.isAdmin != null) {
-        res.result.isAdmin = req.body.isAdmin
-      }
+    if (req.body.isAdmin == "true") {
+        res.result.isAdmin = true;
+    }
+    if (req.body.isAdmin == "false") {
+        res.result.isAdmin = false;
+    }
     try {
       const updatedSubscriber = await res.result.save()
       res.json(updatedSubscriber)

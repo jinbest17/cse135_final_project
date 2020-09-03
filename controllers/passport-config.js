@@ -5,7 +5,7 @@ const userModel = require('../models/user');
 
 function initialize(passport) {
     const authenticateUser = async (username, password, done) => {
-        let user = await userModel.findOne({'username' : username}).exec();
+        let user = await userModel.findOne({'username' : username}).exec() || await userModel.findOne({'email' : username}).exec();
         console.log(user);
         if (user == null) {
             return done(null, false, {message: "No user with that email"});

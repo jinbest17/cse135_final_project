@@ -10,7 +10,12 @@ const path = require('path');
 // add router for apis here
 
 router.get('/', checkAuthenticated, (req, res) => {
-    res.render('index.ejs', {name: req.user.name});
+    if(req.user.isAdmin) {
+        res.render('index-admin.ejs', {name: req.user.name});
+    } else {
+        res.render('index.ejs', {name: req.user.name});
+    }
+
 });
 
 router.get('/login', (req, res) => {

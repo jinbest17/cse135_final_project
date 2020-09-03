@@ -54,7 +54,12 @@ router.post('/logout', (req, res) => {
 });
 
 router.get('/users', checkAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/users.html'));
+    if(req.user.isAdmin == true) {
+        res.sendFile(path.join(__dirname, '../views/users.html'));
+    } else {
+        res.status(401).json({message: "You are not authorized to access this page"});
+    }
+
 })
 
 // router for CRUD API

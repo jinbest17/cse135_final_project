@@ -51,14 +51,14 @@ router.post('/register', async (req, res) => {
 router.post('/logout', (req, res) => {
     req.logOut();
     res.redirect('/login');
-  });
+});
 
-router.get('/users', (req, res) => {
+router.get('/users', checkAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../views/users.html'));
 })
 
 // router for CRUD API
-router.get('/api', async (req, res) => {
+router.get('/api', checkAPIAuthenticated, async (req, res) => {
     try {
         const data = await userAuth.find();
         res.json(data);
@@ -70,7 +70,7 @@ router.get('/api', async (req, res) => {
 /**
  * Add new entry with no custom id
  */
-router.post('/api', async (req, res) => {
+router.post('/api', checkAPIAuthenticated, async (req, res) => {
     //try hash password
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -91,7 +91,7 @@ router.post('/api', async (req, res) => {
 /**
  * Delete an entry given id
  */
-router.delete('/api/:id', getUserAuthData, async (req, res) => {
+router.delete('/api/:id', checkAPIAuthenticated,getUserAuthData, async (req, res) => {
     try {
         await res.result.remove();
         res.json({message: 'deleted given entry'});
@@ -104,7 +104,7 @@ router.delete('/api/:id', getUserAuthData, async (req, res) => {
 /**
  * Update an entry given id
  */
-router.put('/api/:id', (req, res) => {
+router.put('/api/:id', checkAPIAuthenticated,(req, res) => {
     if (!req.body) {
         return res.status(400).send({
           message: "Data to update can not be empty!"
@@ -132,7 +132,7 @@ router.put('/api/:id', (req, res) => {
 /**
  * Partial update
  */
-router.patch('/api/:id', getUserAuthData, async (req, res) => {
+router.patch('/api/:id', checkAPIAuthenticated, getUserAuthData, async (req, res) => {
     if (req.body.username != null) {
       res.result.username = req.body.username
     }
@@ -173,106 +173,21 @@ function checkAuthenticated(req, res, next) {
     }
   
     res.redirect('/login');
-  }
+}
   
-  function checkNotAuthenticated(req, res, next) {
+function checkNotAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
       return res.redirect('/')
     }
-    next()
-  }
-// /**
-//  * Get all entries in the entire browser table
-//  */
-// router.get('/initialBrowserData', async (req, res) => {
-//     try {
-//         const data = await browser.find();
-//         res.json(data);
-//     } catch (err) {
-//         res.status(500).json({message: err.message});
-//     }
-// });
+    next();
+}
 
-// /**
-//  * Get specific entry given id
-//  */
-// router.get('/initialBrowserData/:id', getInitialBrowserData, async (req, res) => {
-//     res.json(res.result);
-// });
-
-// /**
-//  * Add new entry with no custom id
-//  */
-// router.post('/initialBrowserData', async (req, res) => {
-//     const newEntry = new browser({
-//         data: req.body.data,
-//         eventProperties: req.body.eventProperties,
-//         navigatorInformation: req.body.navigatorInformation,
-//         vitalsScore: req.body.vitalsScore,
-//         timestamp: req.body.timestamp,
-//         clientAddress: req.ip
-//     });
-//     try {
-//        const savedEntry = await newEntry.save();
-//        res.status(201).json(savedEntry); 
-//     } catch {
-//         res.status(400).json({message: err.message});
-//     }
-// });
-
-
-// /**
-//  * Delete an entry given id
-//  */
-// router.delete('/initialBrowserData/:id', getInitialBrowserData, async (req, res) => {
-//     try {
-//         await res.result.remove();
-//         res.json({message: 'deleted given entry'});
-//     } catch {
-//         res.status(500).json({message: err.message});
-//     }
-// });
-
-// /**
-//  * Update an entry given id
-//  */
-// router.put('/initialBrowserData/:id', (req, res) => {
-//     if (!req.body) {
-//         return res.status(400).send({
-//           message: "Data to update can not be empty!"
-//         });
-//       }
-    
-//       const id = req.params.id;
-    
-//       browser.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
-//         .then(data => {
-//           if (!data) {
-//             res.status(404).send({
-//               message: `Cannot update Tutorial with id=${id}. Maybe Tutorial was not found!`
-//             });
-//           } else res.send({ message: "Tutorial was updated successfully." });
-//         })
-//         .catch(err => {
-//           res.status(500).send({
-//             message: "Error updating Tutorial with id=" + id
-//           });
-//         });
-// });
-
-// async function getInitialBrowserData(req, res, next) {
-//     let result;
-//     try {
-//         result = await browser.findById(req.params.id);
-//         if(result == null) {
-//             return res.status(404).json({message: 'Cannot find document associated with given id.'});
-//         }
-//     } catch (err) {
-//         return res.status(500).json({message: err.message});
-//     }
-//     res.result = result;
-//     next();
-// }
-
+function checkAPIAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+      return next();
+    }
+  
+    res.status(401).json({message: "You are not authenticated"})
+}
 
 module.exports = router;

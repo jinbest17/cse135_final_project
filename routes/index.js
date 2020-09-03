@@ -83,7 +83,7 @@ router.post('/api', async (req, res) => {
         const savedEntry = await newUser.save();
         console.log(savedEntry);
         res.status(201).json(savedEntry);
-    } catch {
+    } catch (err) {
         res.status(400).json({message: err.message});
     }
 });

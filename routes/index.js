@@ -5,6 +5,7 @@ const userAuth = require('../models/user');
 const bcrypt = require('bcrypt');
 const initializePassport = require('../controllers/passport-config');
 const passport = require('passport');
+const path = require('path');
 
 // add router for apis here
 
@@ -52,7 +53,9 @@ router.post('/logout', (req, res) => {
     res.redirect('/login');
   });
 
-
+router.get('/users', (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/users.html'));
+})
 
 // router for CRUD API
 router.get('/api', async (req, res) => {

@@ -53,7 +53,7 @@ router.delete('/logout', (req, res) => {
   });
 
 // router for CRUD API
-router.get('/api', (req, res) => {
+router.get('/api', async (req, res) => {
     try {
         const data = await userAuth.find();
         res.json(data);

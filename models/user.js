@@ -7,9 +7,8 @@ const userSchema = mongoose.Schema({
     password: {
         type: String
     },
-    role: {
-        type: String,
-        enum: ['admin', 'viewer']
+    isAdmin: {
+        type: Boolean
     }
 });
 

@@ -52,6 +52,8 @@ router.post('/logout', (req, res) => {
     res.redirect('/login');
   });
 
+
+
 // router for CRUD API
 router.get('/api', async (req, res) => {
     try {
@@ -73,7 +75,7 @@ router.post('/api', async (req, res) => {
             username: req.body.username,
             email: req.body.email,
             password: hashedPassword,
-            role: 'viewer'
+            isAdmin: false
         });
         const savedEntry = await newUser.save();
         console.log(savedEntry);
@@ -129,11 +131,14 @@ router.put('/api/:id', (req, res) => {
  */
 router.patch('/api/:id', getUserAuthData, async (req, res) => {
     if (req.body.username != null) {
-      res.result.username = req.body.name
+      res.result.username = req.body.username
     }
     if (req.body.email != null) {
       res.result.email = req.body.email
     }
+    if (req.body.isAdmin != null) {
+        res.result.isAdmin = req.body.isAdmin
+      }
     try {
       const updatedSubscriber = await res.result.save()
       res.json(updatedSubscriber)

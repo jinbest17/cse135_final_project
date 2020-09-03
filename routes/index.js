@@ -8,17 +8,17 @@ const passport = require('passport');
 
 // add router for apis here
 
-router.get('/', (req, res) => {
-    res.render('index.ejs');
+router.get('/', checkAuthenticated, (req, res) => {
+    res.render('index.ejs', {name: req.user.name});
 });
 
 router.get('/login', (req, res) => {
     res.render('login.ejs')
 });
 
-router.get('/register', (req, res) => {
-    res.render('register.ejs');
-});
+// router.get('/register', (req, res) => {
+//     res.render('register.ejs');
+// });
 
 router.post('/login', passport.authenticate('local', {
     successRedirect: '/',
@@ -33,6 +33,7 @@ router.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         const newUser = new userAuth({
             username: req.body.name,
+            email: req.body.email,
             password: hashedPassword,
             role: 'viewer'
         });
@@ -45,6 +46,130 @@ router.post('/register', async (req, res) => {
 
 
 });
+
+router.delete('/logout', (req, res) => {
+    req.logOut();
+    res.redirect('/login');
+  });
+
+// router for CRUD API
+router.get('/api', (req, res) => {
+    try {
+        const data = await userAuth.find();
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({message: err.message});
+    }
+});
+
+/**
+ * Add new entry with no custom id
+ */
+router.post('/api', async (req, res) => {
+    //try hash password
+    try {
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        const newUser = new userAuth({
+            username: req.body.username,
+            email: req.body.email,
+            password: hashedPassword,
+            role: 'viewer'
+        });
+        const savedEntry = await newUser.save();
+        console.log(savedEntry);
+        res.status(201).json(savedEntry);
+    } catch {
+        res.status(400).json({message: err.message});
+    }
+});
+
+/**
+ * Delete an entry given id
+ */
+router.delete('/api/:id', getUserAuthData, async (req, res) => {
+    try {
+        await res.result.remove();
+        res.json({message: 'deleted given entry'});
+    } catch {
+        res.status(500).json({message: err.message});
+    }
+});
+
+
+/**
+ * Update an entry given id
+ */
+router.put('/api/:id', (req, res) => {
+    if (!req.body) {
+        return res.status(400).send({
+          message: "Data to update can not be empty!"
+        });
+      }
+    
+      const id = req.params.id;
+    
+      userAuth.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
+        .then((data) => {
+          if (!data) {
+            res.status(404).send({
+              message: `Cannot update Tutorial with id=${id}. Maybe Tutorial was not found!`
+            });
+          } else res.send({ message: "Tutorial was updated successfully." });
+        })
+        .catch((err) => {
+          res.status(500).send({
+            message: "Error updating Tutorial with id=" + id
+          });
+        });
+});
+
+
+/**
+ * Partial update
+ */
+router.patch('/api/:id', getUserAuthData, async (req, res) => {
+    if (req.body.username != null) {
+      res.result.username = req.body.name
+    }
+    if (req.body.email != null) {
+      res.result.email = req.body.email
+    }
+    try {
+      const updatedSubscriber = await res.result.save()
+      res.json(updatedSubscriber)
+    } catch (err) {
+      res.status(400).json({ message: err.message })
+    }
+  })
+
+async function getUserAuthData(req, res, next) {
+    let result;
+    try {
+        result = await userAuth.findById(req.params.id);
+        if(result == null) {
+            return res.status(404).json({message: 'Cannot find document associated with given id.'});
+        }
+    } catch (err) {
+        return res.status(500).json({message: err.message});
+    }
+    res.result = result;
+    next();
+}
+
+function checkAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+      return next();
+    }
+  
+    res.redirect('/login');
+  }
+  
+  function checkNotAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+      return res.redirect('/')
+    }
+    next()
+  }
 // /**
 //  * Get all entries in the entire browser table
 //  */

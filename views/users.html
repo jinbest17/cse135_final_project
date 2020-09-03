@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+ 
+<head>
+  <meta charset="utf-8">
+  <title>ZingGrid: Blank Grid</title>
+  <script src="https://cdn.zinggrid.com/zinggrid.min.js" defer></script>
+  <style>
+    body {
+      background: #e6e6e6;
+    }
+ 
+    zing-grid[loading] {
+      height: 548px;
+    }
+  </style>
+</head>
+ 
+<body>
+ 
+  <zing-grid src="http://reporting.jinhaoliu.com/api" caption="CRUD Endpoint" editor-controls="all" pager="" page-size="5" layout="row" role="grid" editor="inline" viewport="tablet-portrait">
+    <zg-param name="idKey" value="_id"></zg-param>
+  </zing-grid>
+ 
+  <script></script>
+</body>
+ 
+</html>

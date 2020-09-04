@@ -1,4 +1,376 @@
-<h1>Hi <%= name %></h1>
-<form action="/logout" method="POST">
-  <button type="submit">Log Out</button>
-</form>
+<!doctype html>
+<html>
+
+<head>
+  <title>Analytics Data Charts</title>
+  <script src="https://cdn.zingchart.com/zingchart.min.js"></script>
+  <style>
+    /* Style the tab */
+    .tab {
+      overflow: hidden;
+      border: 1px solid #ccc;
+      background-color: #f1f1f1;
+    }
+
+    /* Style the buttons that are used to open the tab content */
+    .tab button {
+      background-color: inherit;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      transition: 0.3s;
+    }
+
+    /* Change background color of buttons on hover */
+    .tab button:hover {
+      background-color: #ddd;
+    }
+
+    /* Create an active/current tablink class */
+    .tab button.active {
+      background-color: #ccc;
+    }
+
+    /* Style the tab content */
+    .tabcontent {
+      display: none;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="myLineChart"></div>
+  <div id="myBarChart"></div>
+  <div id="myPieChart"></div>
+  <script>
+    const promNav = new Promise(async (resolve, reject) => {
+      const url = 'http://jinhaoliu.com/api/navigationTiming';
+      let res = await fetch(url);
+      const data = await res.json();
+      let result = [];
+      data.forEach((entry) => {
+        result.push(entry.data);
+      });
+      console.log(result);
+      resolve(result);
+    });
+    const promCLS = new Promise(async (resolve, reject) => {
+      const url = 'http://jinhaoliu.com/api/cls';
+      let res = await fetch(url);
+      const data = await res.json();
+      console.log(data);
+      let result = [];
+      data.forEach((entry) => {
+        result.push(entry.data);
+      });
+      console.log(result);
+      resolve(result);
+    });
+    const promFCP = new Promise(async (resolve, reject) => {
+      const url = 'http://jinhaoliu.com/api/fcp';
+      let res = await fetch(url);
+      const data = await res.json();
+      let result = [];
+      data.forEach((entry) => {
+        result.push(entry.data);
+      });
+      console.log(result);
+      resolve(result);
+    });
+    function average(nums) {
+      return nums.reduce((a, b) => (a + b)) / nums.length;
+    }
+    const promBar = new Promise(async (resolve, reject) => {
+      const FCPUrl = 'http://jinhaoliu.com/api/fcp';
+      const NetworkUrl = 'http://jinhaoliu.com/api/networkInformation';
+      let fcp = await fetch(FCPUrl);
+      let net = await fetch(NetworkUrl);
+      const fcpData = await fcp.json();
+      const netData = await net.json();
+      let lowFCP = [];
+      let highFCP = [];
+      let lowNet = [];
+      let highNet = [];
+      fcpData.forEach((entry) => {
+        if (entry.navigatorInformation.isLowEndDevice) {
+          lowFCP.push(entry.data);
+        } else {
+          highFCP.push(entry.data);
+        }
+      });
+      netData.forEach((entry) => {
+        if (entry.navigatorInformation.isLowEndDevice) {
+          lowNet.push(entry.data);
+        } else {
+          highNet.push(entry.data);
+        }
+      });
+      let result = {
+        lowNet: [average(lowNet), average(lowFCP)],
+        highNet: [average(highNet), average(highFCP)]
+      };
+      console.log(result);
+      resolve(result);
+    });
+
+    Promise.all([promNav, promCLS, promFCP]).then((values) => {
+      zingchart.render({
+        id: 'myLineChart',
+        data: {
+          type: 'line',
+          legend: {
+            "layout": "float",
+            "background-color": "none",
+            "border-width": 0,
+            "shadow": 0,
+            "align": "center",
+            "adjust-layout": true,
+            "toggle-action": "remove",
+            "item": {
+              "padding": 7,
+              "marginRight": 17,
+              "cursor": "hand"
+            }
+          },
+          series: [
+            {
+              values: values[0], text: "NavigationTiming", "line-color": "#007790",
+              "legend-item": {
+                "background-color": "#007790",
+                "borderRadius": 5,
+                "font-color": "white"
+              }
+            },
+            {
+              values: values[2], text: "FCP", "line-color": "#009872",
+              "legend-item": {
+                "background-color": "#009872",
+                "borderRadius": 5,
+                "font-color": "white"
+              }
+            },
+            {
+              values: values[1], text: "CLS", "line-color": "#da534d",
+              "legend-item": {
+                "background-color": "#da534d",
+                "borderRadius": 5,
+                "font-color": "white"
+              }
+            }
+          ]
+        }
+      });
+    });
+
+
+    promBar.then((value) => {
+
+      let myConfig = {
+        "graphset": [{
+          "type": "bar",
+          "background-color": "white",
+          "title": {
+            "text": "Average Load Time from Low/Highend Devices",
+            "font-color": "#7E7E7E",
+            "backgroundColor": "none",
+            "font-size": "22px",
+            "alpha": 1,
+            "adjust-layout": true,
+          },
+          "plotarea": {
+            "margin": "dynamic"
+          },
+          "legend": {
+            "layout": "x3",
+            "overflow": "page",
+            "alpha": 0.05,
+            "shadow": false,
+            "align": "center",
+            "adjust-layout": true,
+            "marker": {
+              "type": "circle",
+              "border-color": "none",
+              "size": "10px"
+            },
+            "border-width": 0,
+            "maxItems": 3,
+            "toggle-action": "hide",
+            "pageOn": {
+              "backgroundColor": "#000",
+              "size": "10px",
+              "alpha": 0.65
+            }
+          },
+          "plot": {
+            "bars-space-left": 0.15,
+            "bars-space-right": 0.15,
+            "animation": {
+              "effect": "ANIMATION_SLIDE_BOTTOM",
+              "sequence": 0,
+              "speed": 800,
+              "delay": 800
+            }
+          },
+          "scale-y": {
+            "line-color": "#7E7E7E",
+            "item": {
+              "font-color": "#7e7e7e"
+            },
+            "values": "0:15:3",
+            "guide": {
+              "visible": true
+            },
+            "label": {
+              "text": "s Seconds",
+              "font-family": "arial",
+              "bold": true,
+              "font-size": "14px",
+              "font-color": "#7E7E7E",
+            },
+          },
+          "scaleX": {
+            "values": [
+              "Network Info",
+              "FCP"
+            ],
+            "placement": "default",
+            "tick": {
+              "size": 58,
+              "placement": "cross"
+            },
+            "itemsOverlap": true,
+            "item": {
+              "offsetY": -55
+            }
+          },
+          "tooltip": {
+            "visible": false
+          },
+          "crosshair-x": {
+            "line-width": "100%",
+            "alpha": 0.18,
+            "plot-label": {
+              "header-text": "%kv Load Seconds"
+            }
+          },
+          "series": [{
+            "values": value.lowNet,
+            "alpha": 0.95,
+            "borderRadiusTopLeft": 7,
+            "background-color": "#8993c7",
+            "text": "Low End Device",
+          },
+          {
+            "values": value.highNet,
+            "borderRadiusTopLeft": 7,
+            "alpha": 0.95,
+            "background-color": "#fdb462",
+            "text": "High End Device"
+          }
+          ]
+        }]
+      }
+      zingchart.render({
+        id: 'myBarChart',
+        data: myConfig
+      });
+    });
+
+    const promMobile = new Promise(async (resolve, reject) => {
+      const url = 'http://jinhaoliu.com/api/initialBrowserData';
+      let res = await fetch(url);
+      const data = await res.json();
+      let result;
+      let count = 0;
+      data.forEach((entry) => {
+        if (entry.data.userAgent.indexOf('Mobile') == -1) {
+          count++;
+        }
+      });
+      result = count / data.length;
+      console.log(result);
+      resolve(result);
+    });
+
+    promMobile.then((desktopPercent) => {
+      mobilePercent = 1 - desktopPercent;
+      var myConfig = {
+        type: "pie",
+        plot: {
+          borderColor: "#2B313B",
+          borderWidth: 5,
+          // slice: 90,
+          valueBox: {
+            placement: 'out',
+            text: '%t\n%npv%',
+            fontFamily: "Open Sans"
+          },
+          tooltip: {
+            fontSize: '18',
+            fontFamily: "Open Sans",
+            padding: "5 10",
+            text: "%npv%"
+          },
+          animation: {
+            effect: 2,
+            method: 5,
+            speed: 900,
+            sequence: 1,
+            delay: 3000
+          }
+        },
+        source: {
+          text: 'gs.statcounter.com',
+          fontColor: "#8e99a9",
+          fontFamily: "Open Sans"
+        },
+        title: {
+          fontColor: "#8e99a9",
+          text: 'Mobile/Desktop Percentage',
+          align: "left",
+          offsetX: 10,
+          fontFamily: "Open Sans",
+          fontSize: 25
+        },
+        subtitle: {
+          offsetX: 10,
+          offsetY: 10,
+          fontColor: "#8e99a9",
+          fontFamily: "Open Sans",
+          fontSize: "16",
+          text: 'Aug 2020',
+          align: "left"
+        },
+        plotarea: {
+          margin: "20 0 0 0"
+        },
+        series: [{
+          values: [desktopPercent],
+          text: "Desktop",
+          backgroundColor: '#50ADF5',
+        },
+        {
+          values: [mobilePercent],
+          text: "Mobile",
+          backgroundColor: '#FF7965'
+        }
+        ]
+      };
+      zingchart.render({
+        id: 'myPieChart',
+        data: myConfig
+      });
+    });
+  </script>
+  <form action="/logout" method="POST">
+    <button type="submit">Log Out</button>
+  </form>
+</body>
+
+</html>

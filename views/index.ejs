@@ -50,7 +50,7 @@
   <div id="myPieChart"></div>
   <script>
     const promNav = new Promise(async (resolve, reject) => {
-      const url = 'http://localhost:5000/api/navigationTiming';
+      const url = 'http://jinhaoliu.com/api/navigationTiming';
       let res = await fetch(url);
       const data = await res.json();
       let result = [];
@@ -61,7 +61,7 @@
       resolve(result);
     });
     const promCLS = new Promise(async (resolve, reject) => {
-      const url = 'http://localhost:5000/api/cls';
+      const url = 'http://jinhaoliu.com/api/cls';
       let res = await fetch(url);
       const data = await res.json();
       console.log(data);
@@ -73,7 +73,7 @@
       resolve(result);
     });
     const promFCP = new Promise(async (resolve, reject) => {
-      const url = 'http://localhost:5000/api/fcp';
+      const url = 'http://jinhaoliu.com/api/fcp';
       let res = await fetch(url);
       const data = await res.json();
       let result = [];
@@ -87,8 +87,8 @@
       return nums.reduce((a, b) => (a + b)) / nums.length;
     }
     const promBar = new Promise(async (resolve, reject) => {
-      const FCPUrl = 'http://localhost:5000/api/fcp';
-      const NetworkUrl = 'http://localhost:5000/api/networkInformation';
+      const FCPUrl = 'http://jinhaoliu.com/api/fcp';
+      const NetworkUrl = 'http://jinhaoliu.com/api/networkInformation';
       let fcp = await fetch(FCPUrl);
       let net = await fetch(NetworkUrl);
       const fcpData = await fcp.json();
@@ -283,7 +283,7 @@
     });
 
     const promMobile = new Promise(async (resolve, reject) => {
-      const url = 'http://localhost:5000/api/initialBrowserData';
+      const url = 'http://jinhaoliu.com/api/initialBrowserData';
       let res = await fetch(url);
       const data = await res.json();
       let result;

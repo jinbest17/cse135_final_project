@@ -286,20 +286,34 @@
       const url = 'http://jinhaoliu.com/api/initialBrowserData';
       let res = await fetch(url);
       const data = await res.json();
-      let result;
-      let count = 0;
+      let result = {};
+      let chromeCount = 0;
+      let otherCount = 0;
+      let firefoxCount = 0;
+      let safariCount = 0;
       data.forEach((entry) => {
-        if (entry.data.userAgent.indexOf('Mobile') == -1) {
-          count++;
+        if (entry.data.userAgent) {
+          if (entry.data.userAgent.indexOf('Chrome') != -1) {
+            chromeCount++;
+          } else if (entry.data.userAgent.indexOf('Safari') != -1) {
+            safariCount++;
+          } else if (entry.data.userAgent.indexOf('Firefox') != -1) {
+            firefoxCount++;
+          } else {
+            otherCount++;
+          }
         }
       });
-      result = count / data.length;
+      let sum = chromeCount + otherCount + firefoxCount + safariCount;
+      result.chrome = chromeCount / sum;
+      result.firefox = firefoxCount / sum;
+      result.safari = safariCount / sum;
+      result.other = otherCount / sum;
       console.log(result);
       resolve(result);
     });
 
-    promMobile.then((desktopPercent) => {
-      mobilePercent = 1 - desktopPercent;
+    promMobile.then((result) => {
       var myConfig = {
         type: "pie",
         plot: {
@@ -332,7 +346,7 @@
         },
         title: {
           fontColor: "#8e99a9",
-          text: 'Mobile/Desktop Percentage',
+          text: 'Client Browser Percentage',
           align: "left",
           offsetX: 10,
           fontFamily: "Open Sans",
@@ -351,14 +365,24 @@
           margin: "20 0 0 0"
         },
         series: [{
-          values: [desktopPercent],
-          text: "Desktop",
-          backgroundColor: '#50ADF5',
+          values: [result.chrome],
+          text: "Chrome",
+          backgroundColor: '#00FF00',
         },
         {
-          values: [mobilePercent],
-          text: "Mobile",
-          backgroundColor: '#FF7965'
+          values: [result.safari],
+          text: "Safari",
+          backgroundColor: '#00FFFF'
+        },
+        {
+          values: [result.firefox],
+          text: "Firefox",
+          backgroundColor: '#FF0000'
+        },
+        {
+          values: [result.other],
+          text: "Other",
+          backgroundColor: '##C0C0C0'
         }
         ]
       };

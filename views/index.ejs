@@ -2,8 +2,9 @@
 <html>
 
 <head>
-  <title>Analytics Data Charts</title>
+  <title>Analytics Data</title>
   <script src="https://cdn.zingchart.com/zingchart.min.js"></script>
+  <script src="https://cdn.zinggrid.com/zinggrid.min.js"></script>
   <style>
     /* Style the tab */
     .tab {
@@ -44,7 +45,15 @@
 </head>
 
 <body>
-
+  <div width="500">
+    <h2>Largest Content Paint Performance by Different Devices</h2>
+    <div class="tab">
+      <button class="tablinks" onclick="openTab(event, 'lowend')" id="lowend">Display Data for Lowend Devices</button>
+      <button class="tablinks" onclick="openTab(event, 'highend')" id="highend">Display Data for Highend
+        Devices</button>
+    </div>
+    <zing-grid pager page-size="6"></zing-grid>
+  </div>
   <div id="myLineChart"></div>
   <div id="myBarChart"></div>
   <div id="myPieChart"></div>
@@ -52,11 +61,7 @@
     const promNav = new Promise(async (resolve, reject) => {
       const url = 'http://jinhaoliu.com/api/navigationTiming';
       let res = await fetch(url);
-      const data = await res.json();
-      let result = [];
-      data.forEach((entry) => {
-        result.push(entry.data);
-      });
+      const result = await res.json();
       console.log(result);
       resolve(result);
     });
@@ -64,6 +69,7 @@
     promNav.then((result) => {
       const today = new Date().getTime();
       let countArray = [0, 0, 0, 0, 0, 0, 0]
+      console.log(today);
       result.forEach((entry) => {
         if (entry.timestamp) {
           if (today - entry.timestamp < 86400000 * 7) {
@@ -84,7 +90,9 @@
             }
           }
         }
+        console.log(entry.timestamp);
       });
+      console.log(countArray);
       myConfig = {
         "graphset": [{
           "type": "bar",
@@ -134,227 +142,301 @@
         data: myConfig
       });
     });
-    const promCLS = new Promise(async (resolve, reject) => {
-      const url = 'http://jinhaoliu.com/api/cls';
-      let res = await fetch(url);
-      const data = await res.json();
-      console.log(data);
-      let result = [];
-      data.forEach((entry) => {
-        result.push(entry.data);
-      });
-      console.log(result);
-      resolve(result);
-    });
-    const promFCP = new Promise(async (resolve, reject) => {
-      const url = 'http://jinhaoliu.com/api/fcp';
-      let res = await fetch(url);
-      const data = await res.json();
-      let result = [];
-      data.forEach((entry) => {
-        result.push(entry.data);
-      });
-      console.log(result);
-      resolve(result);
-    });
-    function average(nums) {
-      return nums.reduce((a, b) => (a + b)) / nums.length;
-    }
-    const promBar = new Promise(async (resolve, reject) => {
-      const FCPUrl = 'http://jinhaoliu.com/api/fcp';
-      const NetworkUrl = 'http://jinhaoliu.com/api/networkInformation';
-      let fcp = await fetch(FCPUrl);
-      let net = await fetch(NetworkUrl);
-      const fcpData = await fcp.json();
-      const netData = await net.json();
-      let lowFCP = [];
-      let highFCP = [];
-      let lowNet = [];
-      let highNet = [];
-      fcpData.forEach((entry) => {
-        if (entry.navigatorInformation.isLowEndDevice) {
-          lowFCP.push(entry.data);
-        } else {
-          highFCP.push(entry.data);
-        }
-      });
-      netData.forEach((entry) => {
-        if (entry.navigatorInformation.isLowEndDevice) {
-          lowNet.push(entry.data);
-        } else {
-          highNet.push(entry.data);
-        }
-      });
-      let result = {
-        lowNet: [average(lowNet), average(lowFCP)],
-        highNet: [average(highNet), average(highFCP)]
-      };
-      console.log(result);
-      resolve(result);
-    });
 
-    Promise.all([promNav, promCLS, promFCP]).then((values) => {
-      zingchart.render({
-        id: 'myLineChart',
-        data: {
-          type: 'line',
-          legend: {
-            "layout": "float",
-            "background-color": "none",
-            "border-width": 0,
-            "shadow": 0,
-            "align": "center",
-            "adjust-layout": true,
-            "toggle-action": "remove",
-            "item": {
-              "padding": 7,
-              "marginRight": 17,
-              "cursor": "hand"
-            }
-          },
-          series: [
-            {
-              values: values[0], text: "NavigationTiming", "line-color": "#007790",
-              "legend-item": {
-                "background-color": "#007790",
-                "borderRadius": 5,
-                "font-color": "white"
-              }
-            },
-            {
-              values: values[2], text: "FCP", "line-color": "#009872",
-              "legend-item": {
-                "background-color": "#009872",
-                "borderRadius": 5,
-                "font-color": "white"
-              }
-            },
-            {
-              values: values[1], text: "CLS", "line-color": "#da534d",
-              "legend-item": {
-                "background-color": "#da534d",
-                "borderRadius": 5,
-                "font-color": "white"
-              }
-            }
-          ]
-        }
-      });
-    });
-
-
-    promBar.then((value) => {
-
-      let myConfig = {
-        "graphset": [{
-          "type": "bar",
-          "background-color": "white",
-          "title": {
-            "text": "Average Load Time from Low/Highend Devices",
-            "font-color": "#7E7E7E",
-            "backgroundColor": "none",
-            "font-size": "22px",
-            "alpha": 1,
-            "adjust-layout": true,
-          },
-          "plotarea": {
-            "margin": "dynamic"
-          },
-          "legend": {
-            "layout": "x3",
-            "overflow": "page",
-            "alpha": 0.05,
-            "shadow": false,
-            "align": "center",
-            "adjust-layout": true,
-            "marker": {
-              "type": "circle",
-              "border-color": "none",
-              "size": "10px"
-            },
-            "border-width": 0,
-            "maxItems": 3,
-            "toggle-action": "hide",
-            "pageOn": {
-              "backgroundColor": "#000",
-              "size": "10px",
-              "alpha": 0.65
-            }
-          },
-          "plot": {
-            "bars-space-left": 0.15,
-            "bars-space-right": 0.15,
-            "animation": {
-              "effect": "ANIMATION_SLIDE_BOTTOM",
-              "sequence": 0,
-              "speed": 800,
-              "delay": 800
-            }
-          },
-          "scale-y": {
-            "line-color": "#7E7E7E",
-            "item": {
-              "font-color": "#7e7e7e"
-            },
-            "values": "0:15:3",
-            "guide": {
-              "visible": true
-            },
-            "label": {
-              "text": "s Seconds",
-              "font-family": "arial",
-              "bold": true,
-              "font-size": "14px",
-              "font-color": "#7E7E7E",
-            },
-          },
-          "scaleX": {
-            "values": [
-              "Network Info",
-              "FCP"
-            ],
-            "placement": "default",
-            "tick": {
-              "size": 58,
-              "placement": "cross"
-            },
-            "itemsOverlap": true,
-            "item": {
-              "offsetY": -55
-            }
-          },
-          "tooltip": {
-            "visible": false
-          },
-          "crosshair-x": {
-            "line-width": "100%",
-            "alpha": 0.18,
-            "plot-label": {
-              "header-text": "%kv Load Seconds"
-            }
-          },
-          "series": [{
-            "values": value.lowNet,
-            "alpha": 0.95,
-            "borderRadiusTopLeft": 7,
-            "background-color": "#8993c7",
-            "text": "Low End Device",
-          },
-          {
-            "values": value.highNet,
-            "borderRadiusTopLeft": 7,
-            "alpha": 0.95,
-            "background-color": "#fdb462",
-            "text": "High End Device"
-          }
-          ]
-        }]
+    function compareData(a, b) {
+      if (a.loadTime < b.loadTime) {
+        return 1;
+      } else if (a.loadTime > b.loadTime) {
+        return -1;
+      } else {
+        return 0;
       }
-      // zingchart.render({
-      //   id: 'myBarChart',
-      //   data: myConfig
-      // });
-    });
+    }
+    async function openTab(evt, measureName) {
+      const url = 'http://jinhaoliu.com/api/lcpFinal';
+      let res = await fetch(url);
+      const data = await res.json();
+      let results = [];
+      if (measureName == "lowend") {
+        data.forEach((entry) => {
+          if (entry.navigatorInformation.isLowEndDevice == true) {
+            let clientAddress = entry.clientAddress || entry.location.ip;
+            let countryEmoji;
+            if ( entry.location == null) {
+              countryEmoji = "N/A";
+            } else {
+              countryEmoji = entry.location.location.country_flag_emoji
+            }
+            let result = {
+              loadTime: entry.data,
+              clientAddress: clientAddress,
+              clientCountry: countryEmoji,
+              vitalScore: entry.vitalsScore,
+              hardwareConcurrency: entry.navigatorInformation.hardwareConcurrency
+            }
+            results.push(result);
+          }
+        });
+      } else {
+        data.forEach((entry) => {
+          if (entry.navigatorInformation.isLowEndDevice == false) {
+            let clientAddress = entry.clientAddress || entry.location.ip;
+            let countryEmoji;
+            if ( entry.location == null) {
+              countryEmoji = "N/A";
+            } else {
+              countryEmoji = entry.location.location.country_flag_emoji
+            }
+            let result = {
+              loadTime: entry.data,
+              clientAddress: clientAddress,
+              clientCountry: countryEmoji,
+              vitalScore: entry.vitalsScore,
+              hardwareConcurrency: entry.navigatorInformation.hardwareConcurrency
+            }
+            results.push(result);
+          }
+        });
+      }
+      console.log(results);
+
+      // sort the array based on loadtime
+      const zgRef = document.querySelector('zing-grid');
+      zgRef.setData(results.sort(compareData));
+      // Get all elements with class="tablinks" and remove the class "active"
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+
+      // Show the current tab, and add an "active" class to the button that opened the tab
+      document.getElementById(measureName).className += " active";
+    }
+
+    // open default tab
+    document.getElementById("lowend").click();
+
+    // const promCLS = new Promise(async (resolve, reject) => {
+    //   const url = 'http://jinhaoliu.com/api/cls';
+    //   let res = await fetch(url);
+    //   const data = await res.json();
+    //   console.log(data);
+    //   let result = [];
+    //   data.forEach((entry) => {
+    //     result.push(entry.data);
+    //   });
+    //   console.log(result);
+    //   resolve(result);
+    // });
+    // const promFCP = new Promise(async (resolve, reject) => {
+    //   const url = 'http://jinhaoliu.com/api/fcp';
+    //   let res = await fetch(url);
+    //   const data = await res.json();
+    //   let result = [];
+    //   data.forEach((entry) => {
+    //     result.push(entry.data);
+    //   });
+    //   console.log(result);
+    //   resolve(result);
+    // });
+    // function average(nums) {
+    //   return nums.reduce((a, b) => (a + b)) / nums.length;
+    // }
+    // const promBar = new Promise(async (resolve, reject) => {
+    //   const FCPUrl = 'http://jinhaoliu.com/api/fcp';
+    //   const NetworkUrl = 'http://jinhaoliu.com/api/networkInformation';
+    //   let fcp = await fetch(FCPUrl);
+    //   let net = await fetch(NetworkUrl);
+    //   const fcpData = await fcp.json();
+    //   const netData = await net.json();
+    //   let lowFCP = [];
+    //   let highFCP = [];
+    //   let lowNet = [];
+    //   let highNet = [];
+    //   fcpData.forEach((entry) => {
+    //     if (entry.navigatorInformation.isLowEndDevice) {
+    //       lowFCP.push(entry.data);
+    //     } else {
+    //       highFCP.push(entry.data);
+    //     }
+    //   });
+    //   netData.forEach((entry) => {
+    //     if (entry.navigatorInformation.isLowEndDevice) {
+    //       lowNet.push(entry.data);
+    //     } else {
+    //       highNet.push(entry.data);
+    //     }
+    //   });
+    //   let result = {
+    //     lowNet: [average(lowNet), average(lowFCP)],
+    //     highNet: [average(highNet), average(highFCP)]
+    //   };
+    //   console.log(result);
+    //   resolve(result);
+    // });
+
+    // Promise.all([promNav, promCLS, promFCP]).then((values) => {
+    //   zingchart.render({
+    //     id: 'myLineChart',
+    //     data: {
+    //       type: 'line',
+    //       legend: {
+    //         "layout": "float",
+    //         "background-color": "none",
+    //         "border-width": 0,
+    //         "shadow": 0,
+    //         "align": "center",
+    //         "adjust-layout": true,
+    //         "toggle-action": "remove",
+    //         "item": {
+    //           "padding": 7,
+    //           "marginRight": 17,
+    //           "cursor": "hand"
+    //         }
+    //       },
+    //       series: [
+    //         {
+    //           values: values[0], text: "NavigationTiming", "line-color": "#007790",
+    //           "legend-item": {
+    //             "background-color": "#007790",
+    //             "borderRadius": 5,
+    //             "font-color": "white"
+    //           }
+    //         },
+    //         {
+    //           values: values[2], text: "FCP", "line-color": "#009872",
+    //           "legend-item": {
+    //             "background-color": "#009872",
+    //             "borderRadius": 5,
+    //             "font-color": "white"
+    //           }
+    //         },
+    //         {
+    //           values: values[1], text: "CLS", "line-color": "#da534d",
+    //           "legend-item": {
+    //             "background-color": "#da534d",
+    //             "borderRadius": 5,
+    //             "font-color": "white"
+    //           }
+    //         }
+    //       ]
+    //     }
+    //   });
+    // });
+
+
+    // promBar.then((value) => {
+
+    //   let myConfig = {
+    //     "graphset": [{
+    //       "type": "bar",
+    //       "background-color": "white",
+    //       "title": {
+    //         "text": "Average Load Time from Low/Highend Devices",
+    //         "font-color": "#7E7E7E",
+    //         "backgroundColor": "none",
+    //         "font-size": "22px",
+    //         "alpha": 1,
+    //         "adjust-layout": true,
+    //       },
+    //       "plotarea": {
+    //         "margin": "dynamic"
+    //       },
+    //       "legend": {
+    //         "layout": "x3",
+    //         "overflow": "page",
+    //         "alpha": 0.05,
+    //         "shadow": false,
+    //         "align": "center",
+    //         "adjust-layout": true,
+    //         "marker": {
+    //           "type": "circle",
+    //           "border-color": "none",
+    //           "size": "10px"
+    //         },
+    //         "border-width": 0,
+    //         "maxItems": 3,
+    //         "toggle-action": "hide",
+    //         "pageOn": {
+    //           "backgroundColor": "#000",
+    //           "size": "10px",
+    //           "alpha": 0.65
+    //         }
+    //       },
+    //       "plot": {
+    //         "bars-space-left": 0.15,
+    //         "bars-space-right": 0.15,
+    //         "animation": {
+    //           "effect": "ANIMATION_SLIDE_BOTTOM",
+    //           "sequence": 0,
+    //           "speed": 800,
+    //           "delay": 800
+    //         }
+    //       },
+    //       "scale-y": {
+    //         "line-color": "#7E7E7E",
+    //         "item": {
+    //           "font-color": "#7e7e7e"
+    //         },
+    //         "values": "0:15:3",
+    //         "guide": {
+    //           "visible": true
+    //         },
+    //         "label": {
+    //           "text": "s Seconds",
+    //           "font-family": "arial",
+    //           "bold": true,
+    //           "font-size": "14px",
+    //           "font-color": "#7E7E7E",
+    //         },
+    //       },
+    //       "scaleX": {
+    //         "values": [
+    //           "Network Info",
+    //           "FCP"
+    //         ],
+    //         "placement": "default",
+    //         "tick": {
+    //           "size": 58,
+    //           "placement": "cross"
+    //         },
+    //         "itemsOverlap": true,
+    //         "item": {
+    //           "offsetY": -55
+    //         }
+    //       },
+    //       "tooltip": {
+    //         "visible": false
+    //       },
+    //       "crosshair-x": {
+    //         "line-width": "100%",
+    //         "alpha": 0.18,
+    //         "plot-label": {
+    //           "header-text": "%kv Load Seconds"
+    //         }
+    //       },
+    //       "series": [{
+    //         "values": value.lowNet,
+    //         "alpha": 0.95,
+    //         "borderRadiusTopLeft": 7,
+    //         "background-color": "#8993c7",
+    //         "text": "Low End Device",
+    //       },
+    //       {
+    //         "values": value.highNet,
+    //         "borderRadiusTopLeft": 7,
+    //         "alpha": 0.95,
+    //         "background-color": "#fdb462",
+    //         "text": "High End Device"
+    //       }
+    //       ]
+    //     }]
+    //   }
+    //   // zingchart.render({
+    //   //   id: 'myBarChart',
+    //   //   data: myConfig
+    //   // });
+    // });
 
     const promMobile = new Promise(async (resolve, reject) => {
       const url = 'http://jinhaoliu.com/api/initialBrowserData';
